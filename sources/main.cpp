@@ -1,6 +1,12 @@
-#include <iostream>
+#include <QDebug>
+#include <QGuiApplication>
+#include <QWidget>
 
-int main()
+int main(int argc, char** argv)
 {
-    std::cout << "test qt vulkan\n";
+    QGuiApplication app(argc, argv);
+
+    qDebug() << "test qt vulkan\n";
+
+    return app.exec();
 }
