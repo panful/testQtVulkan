@@ -29,7 +29,50 @@ MyRenderer::MyRenderer(QVulkanWindow* window)
 
 void MyRenderer::startNextFrame()
 {
-    qDebug() << "startNextFrame";
+    static uint32_t index {0};
+    qDebug() << "startNextFrame " << index++;
+
+    VkCommandBuffer commandBuffer = m_window->currentCommandBuffer();
+
+    VkExtent2D swapChainExtent {
+        static_cast<uint32_t>(m_window->swapChainImageSize().width()),
+        static_cast<uint32_t>(m_window->swapChainImageSize().height())
+    };
+
+    std::array<VkClearValue, 2> clearValues {};
+    clearValues[0].color        = {.1f, .2f, .3f, 1.f};
+    clearValues[1].depthStencil = {1.f, 0};
+
+    VkViewport viewport = {
+        .x        = 0.f,
+        .y        = 0.f,
+        .width    = static_cast<float>(swapChainExtent.width),
+        .height   = static_cast<float>(swapChainExtent.height),
+        .minDepth = 0.f,
+        .maxDepth = 1.f
+    };
+    VkRect2D scissor = {
+        .offset = {0, 0},
+          .extent = swapChainExtent
+    };
+
+    VkRenderPassBeginInfo renderPassInfo = {
+        .sType           = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO,
+        .renderPass      = m_window->defaultRenderPass(),
+        .framebuffer     = m_window->currentFramebuffer(),
+        .renderArea      = {VkOffset2D {0, 0}, swapChainExtent},
+        .clearValueCount = static_cast<uint32_t>(clearValues.size()),
+        .pClearValues    = clearValues.data()
+    };
+
+    m_devFuncs->vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+    m_devFuncs->vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_pipeline);
+    m_devFuncs->vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
+    m_devFuncs->vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
+    m_devFuncs->vkCmdDraw(commandBuffer, 3, 1, 0, 0);
+
+    m_devFuncs->vkCmdEndRenderPass(commandBuffer);
 
     m_window->frameReady();
 }
@@ -190,6 +233,12 @@ void MyRenderer::releaseResources()
     {
         m_devFuncs->vkDestroyPipeline(m_device, m_pipeline, nullptr);
         m_pipeline = VK_NULL_HANDLE;
+    }
+
+    if (m_pipelineLayout)
+    {
+        m_devFuncs->vkDestroyPipelineLayout(m_device, m_pipelineLayout, nullptr);
+        m_pipelineLayout = VK_NULL_HANDLE;
     }
 }
 
