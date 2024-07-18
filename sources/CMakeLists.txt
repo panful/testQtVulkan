@@ -9,6 +9,7 @@ set(CMAKE_AUTOUIC OFF)
 set(SRCS 
     ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp 
     ${CMAKE_CURRENT_SOURCE_DIR}/MyWindow.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/MyRenderer.cpp
 )
 
 add_executable(${target_name} ${SRCS})
