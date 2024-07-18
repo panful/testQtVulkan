@@ -15,3 +15,5 @@ set(SRCS
 add_executable(${target_name} ${SRCS})
 
 target_link_libraries(${target_name} PRIVATE Qt6::Widgets)
+
+target_compile_definitions(${target_name} PRIVATE SHADER_DIR="${PROJECT_SOURCE_DIR}/resources")
